@@ -5,4 +5,9 @@ Apache Cassandra Self Containt Client
 SimpleCassie is entarly standalone package, in order to use it you just need to include one file into your project - SimpleCassie.php
 
 == Usage ==
-`$cassie = new SimpleCassie(HOST, PORT);`
+{{{
+  require_once('SimpleCassie.php');
+
+  $cassie = new SimpleCassie(HOST, PORT);
+
+}}}
