@@ -109,19 +109,20 @@ SimpleCassie is entirely stand-alone package which wrap itself around Thrift lib
 
 == UUID Examples ==
 {{{
-  
-//setting new uuid column
-$cassie->keyspace('MyApp')->cf('BlogPosts')->key('post')->column($cassie->uuid())->set('Marcin');
+  <?php 
 
-//getting latest added post (assuming TimeUUIDType)
-$post = $cassie->key('post')->slice(1);
+  //setting new uuid column  $cassie->keyspace('MyApp')->cf('BlogPosts')->key('post')->column($cassie->uuid())->set('Marcin');
 
-//getting post column uuid name in canonical form
-$uuid = $cassie->uuid($post->column->name);
+  //getting latest added post (assuming TimeUUIDType)
+  $post = $cassie->key('post')->slice(1);
 
-$string_form = (string) $uuid(); //canonical form
-$binary_form = $uuid->uuid;
+  //getting post column uuid name in canonical form
+  $uuid = $cassie->uuid($post->column->name);
 
+  $string_form = (string) $uuid(); //canonical form
+  $binary_form = $uuid->uuid;
+
+  ?>
 }}}
 
 == Development Roadmap ==
