@@ -13,21 +13,63 @@ SimpleCassie is entarly standalone package, in order to use it you just need to 
     throw new Exception('Couldn\'t connect to server');
 
   /*
+  * setting new column (and key if not exist)
+  * @return - (false) on failure
+  */
+   $cassie->keyspace('MyApp')->cf('Users')->key('user1')->column('name')->set('Marcin');
+   $cassie->column('surname')->set('Rosinski');
+
+  /*
+  * delete column/row
+  * @return - (false) on failure
+  */
+
+  //deleting column
+  $cassie->key('user1')->column('name')->delete();
+
+  //deleting row
+  $cassie->key('user1')->delete();
+
+  /*
   * getting single column
-  * @object StdClass - return object on succes,  null on failure
+  * @return - object on succes,  null on failure
   */
   $name = $cassie->keyspace('Keyspace1')->cf('Standard1')->key('user1')->column('name')->get();
 
   /*
-  * getting multi columns
-  * @object StdClass - return array of objects on success, null on failure
+  * getting multiple columns
+  * @return - array of objects on success, null on failure
   */
   $user = $cassie->column('name','surname')->get();
 
   /*
   * getting single column from multiple keys
-  * @object StdClass - return array of objects on succes,  null on failure
+  * @return - array of objects on succes,  null on failure
   */
   $users = $cassie->key('user1','user2')->column('name')->get();
+
+  /*
+  * getting multiple columns from multiple keys
+  * @return - array of objects on succes,  null on failure
+  */
+  $users = $cassie->key('user1','user2')->column('name','username')->get();
+
+  /*
+  * increment column value
+  * @return - (int) new value on succes, false on failure
+  */
+  $new_value = $cassie->key('user1')->column('friends')->increment();
+
+  /*
+  * decrement column value
+  * @return - (int) new value on succes, false on failure
+  */
+  $new_value = $cassie->key('user1')->column('friends')->decrement();
+
+  /*
+  * count number of columns in ket
+  * @return - (int) on succes, false on failure
+  */
+  $new_value = $cassie->key('user1')->column('friends')->count();
 
 }}}
