@@ -33,7 +33,7 @@
  * @description		Apache Cassandra Self Contain Client
  * @copyright  		Copyright (c) 2010 Marcin Rosinski. (http://www.simpletags.org)
  * @license    		http://www.opensource.org/licenses/bsd-license.php - BSD
- * @version    		Ver: 0.8.1 2010-03-20 10:35
+ * @version    		Ver: 0.8.2 2010-03-20 20:34
  * 
  */
  
