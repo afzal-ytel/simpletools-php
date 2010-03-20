@@ -68,6 +68,8 @@ SimpleCassie is entarly standalone package, in order to use it you just need to 
   */
   $limit = 10;
   $reversed = false;
+  $from_name = 'Puma';
+  $to_name = 'Tiger';
   $friends = $cassie->key('user1friends')->column($from_name,$to_name)->slice($limit,$reversed);
 
   /*
