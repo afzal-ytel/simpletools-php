@@ -2,7 +2,7 @@ Apache Cassandra Self Containt Client
 
 == Introduction ==
 
-SimpleCassie is entarly standalone package, in order to use it you just need to include one file into your project - SimpleCassie.php
+SimpleCassie is entirely stand-alone package which warp itself around Thrift libs (licencsed to Apache Software Foundation). To install you just need to include one file into your project - SimpleCassie.php
 
 == Usage ==
 {{{
@@ -105,3 +105,5 @@ SimpleCassie is entarly standalone package, in order to use it you just need to 
 
   ?>
 }}}
+
+SimpleCassie.php download - click here http://simpletools-php.googlecode.com/files/SimpleCassie.zip
