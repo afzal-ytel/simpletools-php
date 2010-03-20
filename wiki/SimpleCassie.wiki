@@ -21,7 +21,7 @@ SimpleCassie is entirely stand-alone package which wrap itself around Thrift lib
   */
    $cassie->keyspace('MyApp')->cf('Users')->key('user1')->column('name')->set('Marcin');
    $cassie->column('surname')->set('Rosinski');
-
+   
   /*
   * delete column or row/key
   * @return - (false) on failure
@@ -105,6 +105,23 @@ SimpleCassie is entirely stand-alone package which wrap itself around Thrift lib
   $new_value = $cassie->key('user1')->column('friends')->decrement();
 
   ?>
+}}}
+
+== UUID Examples ==
+{{{
+  
+//setting new uuid column
+$cassie->keyspace('MyApp')->cf('BlogPosts')->key('post')->column($cassie->uuid())->set('Marcin');
+
+//getting latest added post (assuming TimeUUIDType)
+$post = $cassie->key('post')->slice(1);
+
+//getting post column uuid name in canonical form
+$uuid = $cassie->uuid($post->column->name);
+
+$string_form = (string) $uuid(); //canonical form
+$binary_form = $uuid->uuid;
+
 }}}
 
 == Development Roadmap ==
