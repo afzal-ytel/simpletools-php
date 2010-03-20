@@ -37,6 +37,84 @@
  * 
  */
  
+	class SimpleCassieUuid
+	{
+		const interval 			= 0x01b21dd213814000;
+		const clearVar 			= 63;  // 00111111  Clears all relevant bits of variant byte with AND
+		const varRFC   			= 128; // 10000000  The RFC 4122 variant (this variant)
+		const clearVer 			= 15;  // 00001111  Clears all bits of version byte with AND 
+		const version1 			= 16;  // 00010000 
+		
+		public function __construct($uuid = null)
+		{
+			if($uuid === null)
+				$this->uuid = $this->__uuid();
+			else
+				$this->uuid = $uuid;
+			
+			$this->uuid_string = $this->__toString();
+		}
+		
+		private function __randomUuidBytes($bytes) 
+		{ 
+		  $rand = ""; 
+		  for ($a = 0; $a < $bytes; $a++) { 
+		   $rand .= chr(mt_rand(0, 255)); 
+		  }  
+		  return $rand; 
+		 }
+		
+		public function __toString()
+		{
+			$uuid = $this->uuid;
+			return   
+		   	bin2hex(substr($uuid,0,4))."-". 
+		   	bin2hex(substr($uuid,4,2))."-". 
+		   	bin2hex(substr($uuid,6,2))."-". 
+		   	bin2hex(substr($uuid,8,2))."-". 
+		   	bin2hex(substr($uuid,10,6)); 
+		}
+		
+		private function __uuid()
+		{
+			/* Generates a Version 1 UUID.  
+		  These are derived from the time at which they were generated. */ 
+		  // Get time since Gregorian calendar reform in 100ns intervals 
+		  // This is exceedingly difficult because of PHP's (and pack()'s)  
+		  //  integer size limits. 
+		  // Note that this will never be more accurate than to the microsecond. 
+		  $time = microtime(1) * 10000000 + self::interval; 
+		  // Convert to a string representation 
+		  $time = sprintf("%F", $time); 
+		  preg_match("/^\d+/", $time, $time); //strip decimal point 
+		  // And now to a 64-bit binary representation 
+		  $time = base_convert($time[0], 10, 16); 
+		  $time = pack("H*", str_pad($time, 16, "0", STR_PAD_LEFT)); 
+		  // Reorder bytes to their proper locations in the UUID 
+		  $uuid  = $time[4].$time[5].$time[6].$time[7].$time[2].$time[3].$time[0].$time[1]; 
+		  // Generate a random clock sequence 
+		  $uuid .= $this->__randomUuidBytes(2); 
+		  // set variant 
+		  $uuid[8] = chr(ord($uuid[8]) & self::clearVar | self::varRFC); 
+		  // set version 
+		  $uuid[6] = chr(ord($uuid[6]) & self::clearVer | self::version1); 
+		  // Set the final 'node' parameter, a MAC address 
+		  
+		    // If no node was provided or if the node was invalid,  
+		    //  generate a random MAC address and set the multicast bit 
+		   $node = $this->__randomUuidBytes(6); 
+		   $node[0] = pack("C", ord($node[0]) | 1); 
+		  
+		  $uuid .= $node; 
+		  return $uuid; 
+		}
+		
+		public static function binUuid($uuid)
+		{
+			return pack("H*", $uuid);
+		}
+	}
+	
 	class SimpleCassie
 	{
 		private $__connection 	= null;
@@ -49,6 +127,11 @@
 		private $__superColumn	= null;
 		
 		private $__connected	= false;
+		
+		public function uuid($uuid=null)
+		{
+			return new SimpleCassieUuid($uuid);
+		}
 		
 		public function time()
 		{
@@ -159,42 +242,30 @@
 		{
 			if(!$this->__connected) return null;
 			
-			if(!is_array($this->__key))
+			if(!is_array($this->__column))
 			{
-				if(!is_array($this->__column))
-					return false;	
-				else
-				{
-					return $this->__client->get_slice($this->__keyspace,$this->__key,$this->__getColumnParent(),
-						new cassandra_SlicePredicate(array('slice_range'=>new cassandra_SliceRange(
-							array(
-								'start' 	=> $this->__column[0],
-								'finish'	=> $this->__column[1],
-								'reversed' 	=> $reversed,
-								'count'		=> $count
-							)
-						))), 
-					$consistencyLevel);
-				}
+				$start 	= '';
+				$finish	= '';
 			}
 			else
 			{
-				if(!is_array($this->__column))
-					return false;
-				else
-				{
-					return $this->__client->multiget_slice($this->__keyspace,$this->__key,$this->__getColumnParent(),
-						new cassandra_SlicePredicate(array('slice_range'=>new cassandra_SliceRange(
-							array(
-								'start' 	=> $this->__column[0],
-								'finish'	=> $this->__column[1],
-								'reversed' 	=> $reversed,
-								'count'		=> $count
-							)
-						))), 
-					$consistencyLevel);
-				}
+				$start 	= $this->__column[0];
+				$finish	= $this->__column[1];
 			}
+			
+			$slicePredicate = new cassandra_SlicePredicate(array('slice_range'=>new cassandra_SliceRange(
+						array(
+							'start' 	=> $start,
+							'finish'	=> $finish,
+							'reversed' 	=> $reversed,
+							'count'		=> $count
+						)
+			)));
+					
+			if(!is_array($this->__key))
+				return $this->__client->get_slice($this->__keyspace,$this->__key,$this->__getColumnParent(),$slicePredicate,$consistencyLevel);
+			else
+				return $this->__client->multiget_slice($this->__keyspace,$this->__key,$this->__getColumnParent(),$slicePredicate,$consistencyLevel);
 		}
 		
 		public function value($consistencyLevel=cassandra_ConsistencyLevel::ONE)
@@ -307,16 +378,33 @@
 		{
 			$numargs = func_num_args();
 			if($numargs > 1)
-				$this->__column = func_get_args();
+				$this->__column = $this->__parseColArgs(func_get_args());
 			else
-				$this->__column = $column;
+				$this->__column = ($column instanceof SimpleCassieUuid) ? $column->uuid : $column;
 				
 			return $this;
 		}
 		
+		private function __parseColArgs($args)
+		{
+			$newargs = array();
+			
+			foreach($args as $a)
+			{
+				$newargs[] = ($a instanceof SimpleCassieUuid) ? $a->uuid : $a;
+			}
+			
+			return $newargs;
+		}
+		
 		public function &supercolumn($supercolumn)
 		{
-			$this->__superColumn = $supercolumn;
+			$numargs = func_num_args();
+			if($numargs > 1)
+				$this->__superColumn = $this->__parseColArgs(func_get_args());
+			else
+				$this->__superColumn = ($supercolumn instanceof SimpleCassieUuid) ? $supercolumn->uuid : $supercolumn;
+				
 			return $this;
 		}
 		
