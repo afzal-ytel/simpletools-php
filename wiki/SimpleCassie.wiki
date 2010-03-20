@@ -120,7 +120,7 @@ SimpleCassie is entirely stand-alone package which wrap itself around Thrift lib
   //getting post column uuid name in canonical form
   $uuid = $cassie->uuid($post->column->name);
 
-  $string_form = (string) $uuid(); //canonical form
+  $string_form = (string) $uuid; //canonical form
   $binary_form = $uuid->uuid;
 
   ?>
