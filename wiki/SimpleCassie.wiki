@@ -107,4 +107,13 @@ SimpleCassie is entirely stand-alone package which warp itself around Thrift lib
   ?>
 }}}
 
+== Development Roadmap ==
+* Connection Load Balancing
+* ->value() method for multiple rows/keys
+* ->timestamp() method for multiple rows/keys
+* ->delete() method for multiple rows/keys
+* ->increment() method for multiple rows/keys
+* ->decrement() method for multiple rows/keys
+
+== Download Link ==
 SimpleCassie.php download - http://simpletools-php.googlecode.com/files/SimpleCassie.zip
