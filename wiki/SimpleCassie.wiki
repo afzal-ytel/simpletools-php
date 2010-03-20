@@ -68,7 +68,7 @@ SimpleCassie is entarly standalone package, in order to use it you just need to 
   */
   $limit = 10;
   $reversed = false;
-  $friends = $cassie->key('user1friends')->column($from_name,$to_name)->get($limit,$reversed);
+  $friends = $cassie->key('user1friends')->column($from_name,$to_name)->slice($limit,$reversed);
 
   /*
   * getting slice of columns from single supercolumn row
@@ -76,7 +76,7 @@ SimpleCassie is entarly standalone package, in order to use it you just need to 
   */
   $limit = 10;
   $reversed = false;
-  $friends = $cassie->key('user1')->supercolumn('friends')->column($from_name,$to_name)->get($limit,$reversed);
+  $friends = $cassie->key('user1')->supercolumn('friends')->column($from_name,$to_name)->slice($limit,$reversed);
 
   //resetting supercolumn for future use
   $cassie->key('user1')->supercolumn(null);
@@ -87,7 +87,7 @@ SimpleCassie is entarly standalone package, in order to use it you just need to 
   */
   $limit = 10;
   $reversed = true;
-  $friends = $cassie->key('user1friends','user2friends')->column($from_name,$to_name)->get($limit,$reversed);
+  $friends = $cassie->key('user1friends','user2friends')->column($from_name,$to_name)->slice($limit,$reversed);
 
   /*
   * increment column value
