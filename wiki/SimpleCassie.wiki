@@ -32,6 +32,12 @@ SimpleCassie is entarly standalone package, in order to use it you just need to 
   //deleting row
   $cassie->key('user1')->delete();
 
+   /*
+  * count number of columns in row/key
+  * @return - (int) on succes, false on failure
+  */
+  $count = $cassie->key('user2')->count();
+
   /*
   * getting single column
   * @return - object on succes,  null on failure
@@ -94,12 +100,6 @@ SimpleCassie is entarly standalone package, in order to use it you just need to 
   * @return - (int) new value on succes, false on failure
   */
   $new_value = $cassie->key('user1')->column('friends')->decrement();
-
-  /*
-  * count number of columns in row/key
-  * @return - (int) on succes, false on failure
-  */
-  $new_value = $cassie->key('user1')->count();
 
   ?>
 }}}
