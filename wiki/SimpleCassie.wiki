@@ -107,7 +107,7 @@ SimpleCassie is entirely stand-alone package which wrap itself around Thrift lib
   ?>
 }}}
 
-== UUID Examples ==
+== UUID Usage Examples ==
 {{{
   <?php 
 
