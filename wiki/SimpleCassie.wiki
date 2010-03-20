@@ -12,7 +12,7 @@ SimpleCassie is entirely stand-alone package which warp itself around Thrift lib
   require_once('SimpleCassie.php');
 
   $cassie = new SimpleCassie(HOST, PORT);
-  if($cassie->isConnected())
+  if(!$cassie->isConnected())
     throw new Exception('Couldn\'t connect to server');
 
   /*
