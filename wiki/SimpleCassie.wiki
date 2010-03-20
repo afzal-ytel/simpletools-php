@@ -114,6 +114,9 @@ SimpleCassie is entirely stand-alone package which wrap itself around Thrift lib
   //setting new uuid column
   $cassie->keyspace('MyApp')->cf('BlogPosts')->key('post')->column($cassie->uuid())->set('Marcin');
 
+  //reseting column from above for slice purposes below
+  $cassie->column(null);
+
   //getting latest added post (assuming TimeUUIDType)
   $post = $cassie->key('post')->slice(1);
 
