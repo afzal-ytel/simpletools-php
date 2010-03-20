@@ -106,4 +106,4 @@ SimpleCassie is entirely stand-alone package which warp itself around Thrift lib
   ?>
 }}}
 
-SimpleCassie.php download - click here http://simpletools-php.googlecode.com/files/SimpleCassie.zip
+SimpleCassie.php download - http://simpletools-php.googlecode.com/files/SimpleCassie.zip
