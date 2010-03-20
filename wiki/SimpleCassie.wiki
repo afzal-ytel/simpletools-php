@@ -6,6 +6,8 @@ SimpleCassie is entarly standalone package, in order to use it you just need to 
 
 == Usage ==
 {{{
+  <?php
+
   require_once('SimpleCassie.php');
 
   $cassie = new SimpleCassie(HOST, PORT);
@@ -20,7 +22,7 @@ SimpleCassie is entarly standalone package, in order to use it you just need to 
    $cassie->column('surname')->set('Rosinski');
 
   /*
-  * delete column/row
+  * delete column or row/key
   * @return - (false) on failure
   */
 
@@ -43,16 +45,43 @@ SimpleCassie is entarly standalone package, in order to use it you just need to 
   $user = $cassie->column('name','surname')->get();
 
   /*
-  * getting single column from multiple keys
+  * getting single column from multiple rows/keys
   * @return - array of objects on succes,  null on failure
   */
   $users = $cassie->key('user1','user2')->column('name')->get();
 
   /*
-  * getting multiple columns from multiple keys
+  * getting multiple columns from multiple rows/keys
   * @return - array of objects on succes,  null on failure
   */
   $users = $cassie->key('user1','user2')->column('name','username')->get();
+
+  /*
+  * getting slice of columns from single row/key
+  * @return - array of objects on succes,  null on failure
+  */
+  $limit = 10;
+  $reversed = false;
+  $friends = $cassie->key('user1friends')->column($from_name,$to_name)->get($limit,$reversed);
+
+  /*
+  * getting slice of columns from single supercolumn row
+  * @return - array of objects on succes,  null on failure
+  */
+  $limit = 10;
+  $reversed = false;
+  $friends = $cassie->key('user1')->supercolumn('friends')->column($from_name,$to_name)->get($limit,$reversed);
+
+  //resetting supercolumn for future use
+  $cassie->key('user1')->supercolumn(null);
+
+  /*
+  * getting slice of columns from multiple rows/keys
+  * @return - array of objects on succes,  null on failure
+  */
+  $limit = 10;
+  $reversed = true;
+  $friends = $cassie->key('user1friends','user2friends')->column($from_name,$to_name)->get($limit,$reversed);
 
   /*
   * increment column value
@@ -67,9 +96,10 @@ SimpleCassie is entarly standalone package, in order to use it you just need to 
   $new_value = $cassie->key('user1')->column('friends')->decrement();
 
   /*
-  * count number of columns in ket
+  * count number of columns in row/key
   * @return - (int) on succes, false on failure
   */
-  $new_value = $cassie->key('user1')->column('friends')->count();
+  $new_value = $cassie->key('user1')->count();
 
+  ?>
 }}}
