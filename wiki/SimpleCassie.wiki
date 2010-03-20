@@ -14,15 +14,20 @@ SimpleCassie is entarly standalone package, in order to use it you just need to 
 
   /*
   * getting single column
-  * @object StdClass - return object {column:{name:'',value:'',timestamp:''}} on succes,  null on failure
+  * @object StdClass - return object on succes,  null on failure
   */
   $name = $cassie->keyspace('Keyspace1')->cf('Standard1')->key('user1')->column('name')->get();
-  echo $name->column->value;
 
   /*
   * getting multi columns
-  * @object StdClass - return array of objects {column:{name:'',value:'',timestamp:''}} on success, null on failure
+  * @object StdClass - return array of objects on success, null on failure
   */
-  $name = $cassie->column('name','surname')->get();
+  $user = $cassie->column('name','surname')->get();
+
+  /*
+  * getting single column from multiple keys
+  * @object StdClass - return array of objects on succes,  null on failure
+  */
+  $users = $cassie->key('user1','user2')->column('name')->get();
 
 }}}
