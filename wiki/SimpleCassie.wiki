@@ -9,5 +9,20 @@ SimpleCassie is entarly standalone package, in order to use it you just need to 
   require_once('SimpleCassie.php');
 
   $cassie = new SimpleCassie(HOST, PORT);
+  if($cassie->isConnected())
+    throw new Exception('Couldn\'t connect to server');
+
+  /*
+  * getting single column
+  * @object StdClass - return object {column:{name:'',value:'',timestamp:''}} on succes,  null on failure
+  */
+  $name = $cassie->keyspace('Keyspace1')->cf('Standard1')->key('user1')->column('name')->get();
+  echo $name->column->value;
+
+  /*
+  * getting multi columns
+  * @object StdClass - return array of objects {column:{name:'',value:'',timestamp:''}} on success, null on failure
+  */
+  $name = $cassie->column('name','surname')->get();
 
 }}}
