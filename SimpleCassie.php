@@ -33,7 +33,7 @@
  * @description		Apache Cassandra Self Contain Client
  * @copyright  		Copyright (c) 2010 Marcin Rosinski. (http://www.simpletags.org)
  * @license    		http://www.opensource.org/licenses/bsd-license.php - BSD
- * @version    		Ver: 0.8.3 2010-03-23 21:10
+ * @version    		Ver: 0.8.4 2010-03-28 14:48
  * 
  */
  
@@ -341,7 +341,7 @@
 		{
 			return new cassandra_ColumnParent(array(
 				'column_family' => $this->__columnFamily,
-				'supercolumn' => $this->__superColumn
+				'super_column' => $this->__superColumn
 			));
 		}
 		
@@ -350,7 +350,7 @@
 			return new cassandra_ColumnPath(array(
 				'column_family' => $this->__columnFamily,
 				'column' => $this->__column,
-				'supercolumn' => $this->__superColumn
+				'super_column' => $this->__superColumn
 			));
 		}
 	
