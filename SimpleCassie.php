@@ -85,7 +85,10 @@
 				$this->__connected = false;
 			}
 			
-			$this->__client = new CassandraClient(new TBinaryProtocol($this->__connectiton));
+			if(!function_exists('thrift_protocol_read_binary'))
+				$this->__client = new CassandraClient(new TBinaryProtocol($this->__connectiton));
+			else
+				$this->__client = new CassandraClient(new TBinaryProtocolAccelerated($this->__connectiton));
 		}
 		
 		public function __destruct()
