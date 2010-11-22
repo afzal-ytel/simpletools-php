@@ -4,7 +4,8 @@ Apache Cassandra PHP Client
 == Introduction ==
 
 SimpleCassie is entirely stand-alone package which wrap itself around Thrift libs (licensed to Apache Software Foundation) already built into this class.
-SimpleCassie supports all features of [http://code.google.com/p/simpletools-php/wiki/SimpleCassie#UUID_Usage_Examples TimeUUIDType]
+
+SimpleCassie supports all features of [#UUID_Usage_Examples TimeUUIDType].
 
 The latest version is *compatible only with Cassandra 7.0.x* and higher.
 
