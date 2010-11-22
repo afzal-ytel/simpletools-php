@@ -160,6 +160,7 @@ Please report all bugs under: http://code.google.com/p/simpletools-php/issues/li
 
 == Development Roadmap ==
   * Connection Load Balancing
+  * ->get_range_slices() - coming soon!
   * ->remove() method for multiple rows/keys
   * ->increment() method for multiple rows/keys
   * ->decrement() method for multiple rows/keys
