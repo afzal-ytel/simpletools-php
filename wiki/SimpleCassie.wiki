@@ -3,7 +3,7 @@ Apache Cassandra PHP Client
 
 == Introduction ==
 
-SimpleCassie is entirely stand-alone package which wrap itself around Thrift libs (licensed to Apache Software Foundation).
+SimpleCassie is entirely stand-alone package which wrap itself around Thrift libs (licensed to Apache Software Foundation) already built in SimpleCassie.php
 
 The latest version is *compatible only with Cassandra 7.0.x* and higher.
 
