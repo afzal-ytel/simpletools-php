@@ -158,6 +158,26 @@ Please report all bugs under: http://code.google.com/p/simpletools-php/issues/li
   ?>
 }}}
 
+== Using the Native PHP Extension ==
+
+The PHP Native extension is giving thrift real performance boost so its highly recommend to install it.
+
+
+=== Installation on Centos ===
+{{{
+sudo yum install php-devel
+
+phpize
+./configure --enable-thrift_protocol
+make
+
+sudo cp modules/thrift_protocol.so /usr/lib64/php/modules/
+
+# enable module: /etc/php.d/thrift_protocol.ini
+extension=thrift_protocol.so
+}}}
+
+
 == Development Roadmap ==
   * Connection Load Balancing
   * ->get_range_slices() - coming soon!
