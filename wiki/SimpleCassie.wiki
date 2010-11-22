@@ -5,7 +5,9 @@ Apache Cassandra PHP Client
 
 SimpleCassie is entirely stand-alone package which wrap itself around Thrift libs (licensed to Apache Software Foundation).
 
-The latest version is *compatible only with Cassandra 7.0.x* and higher
+The latest version is *compatible only with Cassandra 7.0.x* and higher.
+
+Please report all bugs under: http://code.google.com/p/simpletools-php/issues/list so will be able to help and comment on them easier.
 
 == Usage ==
 {{{
@@ -156,9 +158,7 @@ The latest version is *compatible only with Cassandra 7.0.x* and higher
 
 == Development Roadmap ==
   * Connection Load Balancing
-  * ->value() method for multiple rows/keys
-  * ->timestamp() method for multiple rows/keys
-  * ->delete() method for multiple rows/keys
+  * ->remove() method for multiple rows/keys
   * ->increment() method for multiple rows/keys
   * ->decrement() method for multiple rows/keys
 
