@@ -5,6 +5,8 @@ Apache Cassandra PHP Client
 
 SimpleCassie is entirely stand-alone package which wrap itself around Thrift libs (licensed to Apache Software Foundation).
 
+The latest version is *compatible only with Cassandra 7.0.x* and higher
+
 == Usage ==
 {{{
   <?php
@@ -14,6 +16,14 @@ SimpleCassie is entirely stand-alone package which wrap itself around Thrift lib
   $cassie = new SimpleCassie(HOST, PORT);
   if(!$cassie->isConnected())
     throw new Exception('Couldn\'t connect to server');
+
+  /*
+  * setting working keyspace
+  * @return - (false) on failure true on success
+  * working keyspace can be change at any point by running ->keyspace() method
+  */
+   $cassie->keyspace('Keyspace1');
+
 
   /*
   * setting new column (and key if not exist)
@@ -28,16 +38,28 @@ SimpleCassie is entirely stand-alone package which wrap itself around Thrift lib
   */
 
   //deleting column
-  $cassie->key('user1')->column('name')->delete();
+  $cassie->key('user1')->column('name')->remove();
 
   //deleting row
-  $cassie->key('user1')->delete();
+  $cassie->key('user1')->remove();
 
    /*
   * count number of columns in row/key
   * @return - (int) on succes, false on failure
   */
   $count = $cassie->key('user2')->count();
+
+  /*
+  * count number of columns with predicate: from column to column
+  * @return - (int) on succes, false on failure
+  */
+  $count = $cassie->key('user2')->column('fromColumn','toColumn')->count();
+
+/*
+  * count number of columns with predicate: from column to column for multiple keys
+  * @return - (int) on succes, false on failure
+  */
+  $count = $cassie->key('user2','user3')->column('fromColumn','toColumn')->count();
 
   /*
   * getting single column
@@ -50,6 +72,12 @@ SimpleCassie is entirely stand-alone package which wrap itself around Thrift lib
   * @return - array of objects on success, null on failure
   */
   $user = $cassie->column('name','surname')->get();
+
+/*
+  * getting multiple column values
+  * @return - array of objects on success, null on failure
+  */
+  $user = $cassie->column('name','surname')->value();
 
   /*
   * getting single column from multiple rows/keys
