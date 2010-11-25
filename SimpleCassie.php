@@ -31,13 +31,13 @@
  * @framework		SimpleTools
  * @packages    	SimpleCassie Client & Thrift Libraries Licenced to Apache Software Foundation
  * @description		Apache Cassandra Self Contain Client
- * @copyright  		Copyright (c) 2010 Marcin Rosinski. (http://www.33concept.com)
+ * @copyright  		Copyright (c) 2010 Marcin Rosinski. (http://www.simpletags.org)
  * @license    		http://www.opensource.org/licenses/bsd-license.php - BSD
- * @version    		Ver: 0.7.0 2010-11-22 14:31
- * @tested with		Cassandra 0.7.0 Beta 3
+ * @version    		Ver: 0.7.1.1 2010-11-25 22:56
  * 
  */
- 	
+ 
+	
 	class SimpleCassie
 	{
 		private $__connection 	= null;
@@ -388,10 +388,18 @@
 			));
 		}
 	
-		public function &keyspace($keyspace)
+		public function &keyspace($keyspace=null)
 		{
+			if($keyspace===null) return $this->__keyspace;
+			if($this->__keyspace == $keyspace) return $this;
+			
 			$this->__keyspace = $keyspace;
-			$r = $this->__client->set_keyspace($keyspace);
+			
+			try
+			{
+				$r = $this->__client->set_keyspace($keyspace);
+			}
+			catch(Exception $e){}
 			
 			return $this;
 		}
@@ -528,6 +536,7 @@
 			return pack("H*", $uuid);
 		}
 	}
+
 
 	/*
 	 * DEPENDENCIES
