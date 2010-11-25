@@ -136,6 +136,12 @@ Please report all bugs under: http://code.google.com/p/simpletools-php/issues/li
   */
   $new_value = $cassie->key('user1')->column('friends')->decrement();
 
+
+  /*
+  * Getting active keyspace
+  */
+  echo $cassie->keyspace();
+
   ?>
 }}}
 
