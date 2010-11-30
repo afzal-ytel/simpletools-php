@@ -1,7 +1,7 @@
 <?php
 /*
  * SimpleTools Framework.
- * Copyright (c) 2010, Marcin Rosinski. (http://www.33concept.com)
+ * Copyrights (c) 2010, Marcin Rosinski. (http://www.33concept.com)
  * All rights reserved.
  * 
  * LICENCE
@@ -31,12 +31,13 @@
  * @framework		SimpleTools
  * @packages    	SimpleCassie Client & Thrift Libraries Licenced to Apache Software Foundation
  * @description		Apache Cassandra Self Contain Client
- * @copyright  		Copyright (c) 2010 Marcin Rosinski. (http://www.simpletags.org)
+ * @copyright  		Copyrights (c) 2010 Marcin Rosinski - 33Concept Ltd. (http://www.33concept.com)
+ * @credits			Workdigital Ltd. (www.workdigital.co.uk)
  * @license    		http://www.opensource.org/licenses/bsd-license.php - BSD
- * @version    		Ver: 0.7.1.1 2010-11-25 22:56
+ * @version    		Ver: 0.7.1.2 2010-11-30 17:36
  * 
  */
- 
+
 	
 	class SimpleCassie
 	{
@@ -50,6 +51,11 @@
 		private $__superColumn	= null;
 		
 		private $__connected	= false;
+		
+		private $__connectTries	= 0;
+		
+		private $__nodes		= array();
+		private $__activeNode	= null;
 		
 		public function uuid($uuid=null)
 		{
@@ -67,28 +73,72 @@
 		
 		public function isConnected()
 		{
+			if($this->__connectTries == 0) $this->__connect();
+			
 			return (boolean) $this->__connected;
 		}
 		
-		public function __construct($host,$port=9160)
+		public function getActiveNode()
 		{
-			try
+			return $this->__activeNode;
+		}
+		
+		private function __connect()
+		{
+			foreach($this->__nodes as $host => $settings)
 			{
-				$socket 	= new TSocket($host,$port);
-				$connection = new TFramedTransport($socket, 1024, 1024);
-				$this->__connectiton = $connection;
-				$this->__connectiton->open();
-				$this->__connected = $this->__connectiton->isOpen();
+				$this->__connectTries++;
+				
+				$port 		= $settings[0];
+				$timeout 	= $settings[1];
+				
+				try
+				{
+					$socket 	= new TSocket($host,$port);
+					
+					if($timeout && $timeout>0)
+					{
+						$socket->setSendTimeout($timeout);
+						$socket->setRecvTimeout($timeout);
+					}
+					
+					$connection = new TFramedTransport($socket, 1024, 1024);
+					$this->__connectiton = $connection;
+					$this->__connectiton->open();
+					$this->__connected = $this->__connectiton->isOpen();
+				}
+				catch(Exception $e)
+				{
+					$this->__connected = false;
+				}
+				
+				if(!function_exists('thrift_protocol_read_binary'))
+					$this->__client = new CassandraClient(new TBinaryProtocol($this->__connectiton));
+				else
+					$this->__client = new CassandraClient(new TBinaryProtocolAccelerated($this->__connectiton));
+					
+					
+				if($this->__connected)
+				{
+					$node 			= new stdClass();
+					$node->host 	= $host;
+					$node->port 	= $port;
+					$node->timeout 	= $timeout;
+					
+					$this->__activeNode = $node;
+					break;
+				}
 			}
-			catch(Exception $e)
-			{
-				$this->__connected = false;
-			}
-			
-			if(!function_exists('thrift_protocol_read_binary'))
-				$this->__client = new CassandraClient(new TBinaryProtocol($this->__connectiton));
-			else
-				$this->__client = new CassandraClient(new TBinaryProtocolAccelerated($this->__connectiton));
+		}
+		
+		public function __construct($host,$port=9160,$timeout=null)
+		{
+			$this->__nodes[$host] = array($port,$timeout);
+		}
+		
+		public function addNode($host,$port=9160,$timeout=null)
+		{
+			$this->__nodes[$host] = array($port,$timeout);
 		}
 		
 		public function __destruct()
@@ -131,11 +181,9 @@
 				return false;
 		}
 		
-		public function count($consistencyLevel=cassandra_ConsistencyLevel::ONE)
+		public function count($count=100,$reversed=false,$consistencyLevel=cassandra_ConsistencyLevel::ONE)
 		{
 			if(!$this->__connected) return null;
-
-			$count=100;$reversed=false;
 			if(!is_array($this->__column))
 			{
 				$start 	= '';
@@ -229,6 +277,90 @@
 			}
 		}
 		
+		public function range($keyCount=100,$columnCount=false,$reversed=false,$consistencyLevel=cassandra_ConsistencyLevel::ONE)
+		{
+			if(!$this->__connected) return null;
+		
+			if($columnCount OR !$this->__column)
+			{
+				if(!$columnCount) $columnCount=100;
+				
+				if(!is_array($this->__column))
+				{
+					if($this->__column)
+						$start 	= $this->__column;
+					else 
+						$start  = '';
+					
+					$finish	= '';
+				}
+				else
+				{
+					$start 	= $this->__column[0];
+					$finish	= $this->__column[1];
+				}
+				
+				$predicate = new cassandra_SlicePredicate(array('slice_range'=>new cassandra_SliceRange(
+								array(
+									'start' 	=> $start,
+									'finish'	=> $finish,
+									'reversed' 	=> $reversed,
+									'count'		=> $columnCount
+								)
+				)));
+			}
+			else
+				$predicate = new cassandra_SlicePredicate(array('column_names'=>$this->__column));
+			
+			if(is_array($this->__key))
+			{
+				$key_range = new cassandra_KeyRange(array(
+					'start_key'		=> $this->__key[0],
+					'end_key'		=> $this->__key[1],
+					'count'			=> $keyCount
+				));
+			}
+			else
+			{
+				$key_range = new cassandra_KeyRange(array(
+					'start_key'		=> $this->__key,
+					'end_key'		=> '',
+					'count'			=> $keyCount
+				));
+			}
+			
+			try
+			{
+				return $this->__client->get_range_slices($this->__getColumnParent(),$predicate,$key_range,$consistencyLevel);
+				
+				/*
+				$r = new stdClass();
+				foreach($res as $v)
+				{
+					$r->{$v->key} = new stdClass();
+					
+					foreach($v->columns as $c)
+					{
+						print_r($c);
+						if(!$c->column->supercolumn)
+							$r->{$v->key}->{$c->column->name} = $c->column->value;
+						else
+						{
+							if(!isset($r->{$v->key}->{$c->column->supercolumn})) $r->{$v->key}->{$c->column->supercolumn} = new stdClass();
+							$r->{$v->key}->{$c->column->supercolumn}->{$c->column->name} = $c->column->value;
+						}
+					}
+				}
+				
+				return $r;
+				*/
+			}
+			catch(Exception $e)
+			{
+				return false;
+			}
+		}
+			
 		public function slice($count=100,$reversed=false,$consistencyLevel=cassandra_ConsistencyLevel::ONE)
 		{
 			if(!$this->__connected) return null;
@@ -390,6 +522,8 @@
 	
 		public function &keyspace($keyspace=null)
 		{
+			if($this->__connectTries == 0) $this->__connect();
+			
 			if($keyspace===null) return $this->__keyspace;
 			if($this->__keyspace == $keyspace) return $this;
 			
@@ -453,8 +587,6 @@
 				
 			return $this;
 		}
-		
-		public function connect(){}
 	}
 	
 	class SimpleCassieUuid
@@ -536,6 +668,7 @@
 			return pack("H*", $uuid);
 		}
 	}
+
 
 
 	/*
