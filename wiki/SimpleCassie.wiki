@@ -154,7 +154,7 @@ Please report all bugs under: http://code.google.com/p/simpletools-php/issues/li
   /*
    * Range support - since SimpleCassie 0.7.1.2
    */
-  $range = $cassie->key('fromKey','toKey')->column('fromColumn','toColumn')->range($keyCount,$columnCount);
+  $range = $cassie->cf('MyColumnFamily')->key('fromKey','toKey')->column('fromColumn','toColumn')->range($keyCount,$columnCount);
 
   ?>
 }}}
