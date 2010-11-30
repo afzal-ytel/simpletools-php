@@ -17,9 +17,18 @@ Please report all bugs under: http://code.google.com/p/simpletools-php/issues/li
 
   require_once('SimpleCassie.php');
 
-  $cassie = new SimpleCassie(HOST, PORT);
+  $cassie = new SimpleCassie(HOST, PORT, TIMEOUT_MS);
+
+
+  //failover support added since SimpleCassie 0.7.1.2 by:
+  $cassie->addNode(HOST2, PORT2, TIMEOUT_MS);
+  $cassie->addNode(HOST3, PORT3, TIMEOUT_MS);
+
   if(!$cassie->isConnected())
     throw new Exception('Couldn\'t connect to server');
+
+  //checking active node - since SimpleCassie 0.7.1.2
+  $activeNode = $cassie->getActiveNode();
 
   /*
   * setting working keyspace
@@ -141,6 +150,11 @@ Please report all bugs under: http://code.google.com/p/simpletools-php/issues/li
   * Getting active keyspace
   */
   echo $cassie->keyspace();
+
+  /*
+   * Range support - since SimpleCassie 0.7.1.2
+   */
+  $range = $cassie->key('fromKey','toKey')->column('fromColumn','toColumn')->range($keyCount,$columnCount);
 
   ?>
 }}}
