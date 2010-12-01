@@ -200,7 +200,6 @@ extension=thrift_protocol.so
 
 == Development Roadmap ==
   * Connection Load Balancing
-  * ->get_range_slices() - coming soon!
   * ->remove() method for multiple rows/keys
   * ->increment() method for multiple rows/keys
   * ->decrement() method for multiple rows/keys
