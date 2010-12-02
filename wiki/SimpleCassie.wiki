@@ -124,7 +124,7 @@ Please report all bugs under: http://code.google.com/p/simpletools-php/issues/li
   $reversed = false;
   $friends = $cassie->cf('Standard1')->key('user1')->supercolumn('friends')->column($from_name,$to_name)->slice($limit,$reversed);
 
-  //resetting supercolumn for future use
+  //resetting supercolumn for future use - deprecated since SimpleCassie 0.7.3.1 - this process has been automated
   $cassie->key('user1')->supercolumn(null);
 
   /*
