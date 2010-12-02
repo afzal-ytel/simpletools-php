@@ -32,12 +32,12 @@
  * @packages    	SimpleCassie Client & Thrift Libraries Licenced to Apache Software Foundation
  * @description		Apache Cassandra Self Contain Client
  * @copyright  		Copyrights (c) 2010 Marcin Rosinski - 33Concept Ltd. (http://www.33concept.com)
- * @credits			Workdigital Ltd. (www.workdigital.co.uk)
+ * @contributes		Workdigital Ltd. (www.workdigital.co.uk)
  * @license    		http://www.opensource.org/licenses/bsd-license.php - BSD
- * @version    		Ver: 0.7.1.2 2010-11-30 17:36
+ * @version    		Ver: 0.7.1.3 2010-12-02 16:20
  * 
  */
-
+ 	
 	
 	class SimpleCassie
 	{
@@ -49,6 +49,11 @@
 		private $__key			= null;
 		private $__column		= null;
 		private $__superColumn	= null;
+		
+		private $__pcolumnFamily= null;
+		private $__pkey			= null;
+		private $__pcolumn		= null;
+		private $__psuperColumn	= null;
 		
 		private $__connected	= false;
 		
@@ -74,13 +79,34 @@
 		public function isConnected()
 		{
 			if($this->__connectTries == 0) $this->__connect();
-			
 			return (boolean) $this->__connected;
 		}
 		
 		public function getActiveNode()
 		{
+			if($this->__connectTries == 0) $this->__connect();
 			return $this->__activeNode;
+		}
+		
+		private function __resetPath()
+		{
+			$this->__pcolumnFamily 	= $this->__columnFamily;
+			$this->__pkey			= $this->__key;
+			$this->__pcolumn		= $this->__column;
+			$this->__psuperColumn	= $this->__superColumn;
+			
+			$this->__columnFamily 	= null;
+			$this->__key			= null;
+			$this->__column			= null;
+			$this->__superColumn	= null;
+		}
+		
+		public function restorePath()
+		{
+			$this->cf($this->__pcolumnFamily)
+			->key($this->__pkey)
+			->supercolumn($this->__psuperColumn)
+			->column($this->__pcolumn);
 		}
 		
 		private function __connect()
@@ -170,15 +196,20 @@
 				try
 				{
 					$this->__client->remove($this->__key,$this->__getColumn(),$this->time(),$consistencyLevel);
+					$this->__resetPath();
 					return true;
 				}
 				catch(Exception $e)
 				{
+					$this->__resetPath();
 					return false;
 				}
 			}
 			else
+			{
+				$this->__resetPath();
 				return false;
+			}
 		}
 		
 		public function count($count=100,$reversed=false,$consistencyLevel=cassandra_ConsistencyLevel::ONE)
@@ -208,10 +239,14 @@
 			{
 				try
 				{
-					return $this->__client->get_count($this->__key, $this->__getColumnParent(), $slicePredicate, $consistencyLevel);
+					$c = $this->__client->get_count($this->__key, $this->__getColumnParent(), $slicePredicate, $consistencyLevel);
+					$this->__resetPath();
+					return $c;
+				
 				}
 				catch(Exception $e)
 				{
+					$this->__resetPath();
 					return false;
 				}
 			}
@@ -219,10 +254,13 @@
 			{
 				try
 				{
-					return $this->__client->multiget_count($this->__key, $this->__getColumnParent(), $slicePredicate, $consistencyLevel);
+					$c = $this->__client->multiget_count($this->__key, $this->__getColumnParent(), $slicePredicate, $consistencyLevel);
+					$this->__resetPath();
+					return $c;
 				}
 				catch(Exception $e)
 				{
+					$this->__resetPath();
 					return false;
 				}
 			}
@@ -238,10 +276,13 @@
 				{
 					try
 					{
-						return $this->__client->get($this->__key,$this->__getColumn(),$consistencyLevel);
+						$o = $this->__client->get($this->__key,$this->__getColumn(),$consistencyLevel);
+						$this->__resetPath();
+						return $o;
 					}
 					catch(Exception $e)
 					{
+						$this->__resetPath();
 						if($e instanceof cassandra_NotFoundException) return null;
 					};
 				}
@@ -249,12 +290,15 @@
 				{
 					try
 					{
-						return $this->__client->get_slice($this->__key,$this->__getColumnParent(),
+						$o = $this->__client->get_slice($this->__key,$this->__getColumnParent(),
 							new cassandra_SlicePredicate(array('column_names'=>$this->__column)), 
 						$consistencyLevel);
+						$this->__resetPath();
+						return $o;
 					}
 					catch(Exception $e)
 					{
+						$this->__resetPath();
 						if($e instanceof cassandra_NotFoundException) return null;
 					};
 				}
@@ -266,12 +310,15 @@
 				
 				try
 				{
-					return $this->__client->multiget_slice($this->__key,$this->__getColumnParent(),
+					$o = $this->__client->multiget_slice($this->__key,$this->__getColumnParent(),
 						new cassandra_SlicePredicate(array('column_names'=>$this->__column)), 
 					$consistencyLevel);
+					$this->__resetPath();
+					return $o;
 				}
 				catch(Exception $e)
 				{
+					$this->__resetPath();
 					if($e instanceof cassandra_NotFoundException) return null;
 				};
 			}
@@ -331,8 +378,9 @@
 			
 			try
 			{
-				return $this->__client->get_range_slices($this->__getColumnParent(),$predicate,$key_range,$consistencyLevel);
-				
+				$o = $this->__client->get_range_slices($this->__getColumnParent(),$predicate,$key_range,$consistencyLevel);
+				$this->__resetPath();
+				return $o;
 				/*
 				$r = new stdClass();
 				foreach($res as $v)
@@ -357,6 +405,7 @@
 			}
 			catch(Exception $e)
 			{
+				$this->__resetPath();
 				return false;
 			}
 		}
@@ -367,8 +416,16 @@
 			
 			if(!is_array($this->__column))
 			{
-				$start 	= '';
-				$finish	= '';
+				if(is_array($this->__superColumn))
+				{
+					$start 	= $this->__superColumn[0];
+					$finish	= $this->__superColumn[1];
+				}
+				else
+				{
+					$start 	= '';
+					$finish	= '';
+				}
 			}
 			else
 			{
@@ -389,10 +446,13 @@
 			{
 				try
 				{
-					return $this->__client->get_slice($this->__key,$this->__getColumnParent(),$slicePredicate,$consistencyLevel);
+					$o = $this->__client->get_slice($this->__key,$this->__getColumnParent(),$slicePredicate,$consistencyLevel);
+					$this->__resetPath();
+					return $o;
 				}
 				catch(Exception $e)
 				{
+					$this->__resetPath();
 					return false;
 				}
 			}
@@ -400,10 +460,13 @@
 			{
 				try
 				{
-					return $this->__client->multiget_slice($this->__key,$this->__getColumnParent(),$slicePredicate,$consistencyLevel);
+					$o = $this->__client->multiget_slice($this->__key,$this->__getColumnParent(),$slicePredicate,$consistencyLevel);
+					$this->__resetPath();
+					return $o;
 				}
 				catch(Exception $e)
 				{
+					$this->__resetPath();
 					return false;
 				}
 			}
@@ -475,10 +538,12 @@
 			    $col->value			=$value; 
 			    
 				$this->__client->insert($this->__key,$this->__getColumn(),$col,$consistencyLevel);
+				$this->__resetPath();
 				return true;
 			}
 			catch(Exception $e)
 			{
+				$this->__resetPath();
 				return false;
 			}
 		}
@@ -488,6 +553,8 @@
 			if(!$this->__connected) return false;
 			
 			$val = (integer) $this->value($consistencyLevel);
+			
+			$this->restorePath();
 			$this->set($val+$step,$consistencyLevel);
 			
 			return $val+$step;
@@ -498,6 +565,8 @@
 			if(!$this->__connected) return false;
 			
 			$val = (integer) $this->value($consistencyLevel);
+			
+			$this->restorePath();
 			$this->set($val-$step,$consistencyLevel);
 			
 			return $val-$step;
@@ -507,7 +576,7 @@
 		{
 			return new cassandra_ColumnParent(array(
 				'column_family' => $this->__columnFamily,
-				'super_column' => $this->__superColumn
+				'super_column' => is_array($this->__superColumn) ? null : $this->__superColumn
 			));
 		}
 		
@@ -668,6 +737,7 @@
 			return pack("H*", $uuid);
 		}
 	}
+
 
 
 
