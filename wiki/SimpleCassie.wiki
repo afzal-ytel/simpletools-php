@@ -43,7 +43,7 @@ Please report all bugs under: http://code.google.com/p/simpletools-php/issues/li
   * @return - (false) on failure
   */
    $cassie->keyspace('MyApp')->cf('Users')->key('user1')->column('name')->set('Marcin');
-   $cassie->column('surname')->set('Rosinski');
+   $cassie->cf('Users')->key('user1')->column('surname')->set('Rosinski');
    
   /*
   * delete column or row/key
@@ -51,28 +51,28 @@ Please report all bugs under: http://code.google.com/p/simpletools-php/issues/li
   */
 
   //deleting column
-  $cassie->key('user1')->column('name')->remove();
+  $cassie->cf('Users')->key('user1')->column('name')->remove();
 
   //deleting row
-  $cassie->key('user1')->remove();
+  $cassie->cf('Users')->key('user1')->remove();
 
    /*
   * count number of columns in row/key
   * @return - (int) on succes, false on failure
   */
-  $count = $cassie->key('user2')->count();
+  $count = $cassie->cf('Users')->key('user2')->count();
 
   /*
   * count number of columns with predicate: from column to column
   * @return - (int) on succes, false on failure
   */
-  $count = $cassie->key('user2')->column('fromColumn','toColumn')->count();
+  $count = $cassie->cf('Users')->key('user2')->column('fromColumn','toColumn')->count();
 
 /*
   * count number of columns with predicate: from column to column for multiple keys
   * @return - (int) on succes, false on failure
   */
-  $count = $cassie->key('user2','user3')->column('fromColumn','toColumn')->count();
+  $count = $cassie->cf('Users')->key('user2','user3')->column('fromColumn','toColumn')->count();
 
   /*
   * getting single column
@@ -84,25 +84,25 @@ Please report all bugs under: http://code.google.com/p/simpletools-php/issues/li
   * getting multiple columns
   * @return - array of objects on success, null on failure
   */
-  $user = $cassie->column('name','surname')->get();
+  $user = $cassie->cf('Standard1')->key('user1')->column('name','surname')->get();
 
 /*
   * getting multiple column values
   * @return - array of objects on success, null on failure
   */
-  $user = $cassie->column('name','surname')->value();
+  $user = $cassie->cf('Standard1')->key('user1')->column('name','surname')->value();
 
   /*
   * getting single column from multiple rows/keys
   * @return - array of objects on succes,  null on failure
   */
-  $users = $cassie->key('user1','user2')->column('name')->get();
+  $users = $cassie->cf('Standard1')->key('user1','user2')->column('name')->get();
 
   /*
   * getting multiple columns from multiple rows/keys
   * @return - array of objects on succes,  null on failure
   */
-  $users = $cassie->key('user1','user2')->column('name','username')->get();
+  $users = $cassie->cf('Standard1')->key('user1','user2')->column('name','username')->get();
 
   /*
   * getting slice of columns from single row/key
@@ -112,7 +112,7 @@ Please report all bugs under: http://code.google.com/p/simpletools-php/issues/li
   $reversed = false;
   $from_name = 'Puma';
   $to_name = 'Tiger';
-  $friends = $cassie->key('user1friends')->column($from_name,$to_name)->slice($limit,$reversed);
+  $friends = $cassie->cf('Standard1')->key('user1friends')->column($from_name,$to_name)->slice($limit,$reversed);
 
   /*
   * getting slice of columns from single supercolumn row
@@ -120,7 +120,7 @@ Please report all bugs under: http://code.google.com/p/simpletools-php/issues/li
   */
   $limit = 10;
   $reversed = false;
-  $friends = $cassie->key('user1')->supercolumn('friends')->column($from_name,$to_name)->slice($limit,$reversed);
+  $friends = $cassie->cf('Standard1')->key('user1')->supercolumn('friends')->column($from_name,$to_name)->slice($limit,$reversed);
 
   //resetting supercolumn for future use
   $cassie->key('user1')->supercolumn(null);
@@ -131,19 +131,19 @@ Please report all bugs under: http://code.google.com/p/simpletools-php/issues/li
   */
   $limit = 10;
   $reversed = true;
-  $friends = $cassie->key('user1friends','user2friends')->column($from_name,$to_name)->slice($limit,$reversed);
+  $friends = $cassie->cf('Standard1')->key('user1friends','user2friends')->column($from_name,$to_name)->slice($limit,$reversed);
 
   /*
   * increment column value
   * @return - (int) new value on succes, false on failure
   */
-  $new_value = $cassie->key('user1')->column('friends')->increment();
+  $new_value = $cassie->cf('Standard1')->key('user1')->column('friends')->increment();
 
   /*
   * decrement column value
   * @return - (int) new value on succes, false on failure
   */
-  $new_value = $cassie->key('user1')->column('friends')->decrement();
+  $new_value = $cassie->cf('Standard1')->key('user1')->column('friends')->decrement();
 
 
   /*
@@ -167,7 +167,7 @@ Please report all bugs under: http://code.google.com/p/simpletools-php/issues/li
   $cassie->keyspace('MyApp')->cf('BlogPosts')->key('post')->column($cassie->uuid())->set('I like raw food.');
 
   //getting latest added post (assuming TimeUUIDType)
-  $post = $cassie->key('post')->slice(1);
+  $post = $cassie->cf('BlogPosts')->key('post')->slice(1);
 
   //getting post column uuid name in canonical form
   $uuid = $cassie->uuid($post->column->name);
