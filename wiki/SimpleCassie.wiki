@@ -184,12 +184,12 @@ Please report all bugs under: http://code.google.com/p/simpletools-php/issues/li
 
 The PHP Native extension is giving thrift real performance boost so its highly recommend to install it.
 
+Please apply patch if getting timeouts - https://issues.apache.org/jira/browse/THRIFT-867 - patch can be downloaded from http://code.google.com/p/simpletools-php/downloads/detail?name=thrift_protocol_patch.zip
+
 
 === Installation on Centos ===
 {{{
 sudo yum install php-devel
-
-//please apply patch if getting timeouts - https://issues.apache.org/jira/browse/THRIFT-867 - patch can be downloaded from http://code.google.com/p/simpletools-php/downloads/detail?name=thrift_protocol_patch.zip
 
 cd PATH-TO-THRIFT/lib/php/src/ext/thrift_protocol
 phpize
