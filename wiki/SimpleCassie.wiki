@@ -11,7 +11,7 @@ The latest version is *compatible only with Cassandra 7.0.x* and higher.
 
 Please report all bugs under: http://code.google.com/p/simpletools-php/issues/list so will be able to help and comment on them easier.
 
-*User Notice: as from SimpleCassie 0.7.1.3 path is being reset after issuing command so you need to remeber to always specify full path ->cf()->key()->.... with every command. The only exception of that is keyspace as this is being set globally per latest Cassandra API*
+*User Notice: as from SimpleCassie 0.7.1.3 path is being reset after issuing command so you need to remember to always specify full path ->cf()->key()->.... with every command. The only exception of that is keyspace as this is being set globally per latest Cassandra API so all command are sharing lastly set keyspace*
 
 == Usage ==
 {{{
