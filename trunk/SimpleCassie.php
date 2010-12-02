@@ -34,11 +34,10 @@
  * @copyright  		Copyrights (c) 2010 Marcin Rosinski - 33Concept Ltd. (http://www.33concept.com)
  * @contributes		Workdigital Ltd. (www.workdigital.co.uk)
  * @license    		http://www.opensource.org/licenses/bsd-license.php - BSD
- * @version    		Ver: 0.7.1.3 2010-12-02 16:20
+ * @version    		Ver: 0.7.1.4 2010-12-02 19:58
  * 
  */
  	
-	
 	class SimpleCassie
 	{
 		private $__connection 	= null;
@@ -62,6 +61,13 @@
 		private $__nodes		= array();
 		private $__activeNode	= null;
 		
+		private $__i64time		= false;
+		
+		public function useI64Timestamps()
+		{
+			$this->__i64time = true;
+		}
+		
 		public function uuid($uuid=null)
 		{
 			return new SimpleCassieUuid($uuid);
@@ -69,11 +75,16 @@
 		
 		public function time()
 		{
-			$time = explode(' ',microtime());
-			$mili = round($time[0]*1000); 
-			$secs = $time[1]*1000;
-		
-			return $secs+$mili;
+			if(!$this->__i64time)
+				return time();
+			else
+			{
+				$time = explode(' ',microtime());
+				$mili = round($time[0]*1000); 
+				$secs = $time[1]*1000;
+			
+				return $secs+$mili;
+			}
 		}
 		
 		public function isConnected()
@@ -210,6 +221,11 @@
 				$this->__resetPath();
 				return false;
 			}
+		}
+		
+		public function truncate()
+		{
+			$this->__client->truncate();
 		}
 		
 		public function count($count=100,$reversed=false,$consistencyLevel=cassandra_ConsistencyLevel::ONE)
@@ -534,7 +550,7 @@
 			{
 				$col	 			= new cassandra_Column();  
 				$col->name			=$this->__column;
-			    $col->timestamp		= $this->time();
+			    $col->timestamp		=$this->time();
 			    $col->value			=$value; 
 			    
 				$this->__client->insert($this->__key,$this->__getColumn(),$col,$consistencyLevel);
@@ -737,8 +753,6 @@
 			return pack("H*", $uuid);
 		}
 	}
-
-
 
 
 	/*
