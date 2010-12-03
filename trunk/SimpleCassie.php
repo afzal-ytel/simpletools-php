@@ -34,10 +34,18 @@
  * @copyright  		Copyrights (c) 2010 Marcin Rosinski - 33Concept Ltd. (http://www.33concept.com)
  * @contributes		Workdigital Ltd. (www.workdigital.co.uk)
  * @license    		http://www.opensource.org/licenses/bsd-license.php - BSD
- * @version    		Ver: 0.7.1.4 2010-12-02 19:58
+ * @version    		Ver: 0.7.1.5 2010-12-03 20:52
  * 
  */
- 	
+ 
+	require_once(dirname(__FILE__).'/0.7.x/src/Thrift.php');
+	require_once(dirname(__FILE__).'/0.7.x/src/transport/TSocket.php');
+	require_once(dirname(__FILE__).'/0.7.x/src/transport/TBufferedTransport.php');
+	require_once(dirname(__FILE__).'/0.7.x/src/transport/TFramedTransport.php');
+	require_once(dirname(__FILE__).'/0.7.x/src/protocol/TBinaryProtocol.php');
+	require_once(dirname(__FILE__).'/0.7.x/Cassandra.php');
+	
+	
 	class SimpleCassie
 	{
 		private $__connection 	= null;
@@ -62,6 +70,9 @@
 		private $__activeNode	= null;
 		
 		private $__i64time		= false;
+		
+		private $__batchContainer 	= array();
+		private $__batchSize		= 0;
 		
 		public function useI64Timestamps()
 		{
@@ -225,7 +236,11 @@
 		
 		public function truncate()
 		{
-			$this->__client->truncate();
+			try{
+				$this->__client->truncate($this->__columnFamily);
+				$this->__resetPath();
+				return true;
+			}catch(Exception $e){$this->__resetPath();return false;}
 		}
 		
 		public function count($count=100,$reversed=false,$consistencyLevel=cassandra_ConsistencyLevel::ONE)
@@ -542,6 +557,74 @@
 			}
 		}
 		
+		private function __collectBatch($val=null)
+		{
+			$batch = array(
+				'cf'			=> $this->__columnFamily,
+				'key'			=> $this->__key,
+				'supercolumn'	=> $this->__superColumn,
+				'column'		=> $this->__column,
+			);
+			
+			if($val!==null)
+				$batch['value']	= $val;
+			
+			$this->__batchContainer[] = $batch;
+			$this->__batchSize++;
+		}
+		
+		public function batchCommit($consistencyLevel=cassandra_ConsistencyLevel::ALL)
+		{
+			if($this->__batchSize == 0) return 0;
+			
+			$mutationMap=array();
+			foreach($this->__batchContainer as $b)
+			{
+				if(isset($b['value']))
+				{
+					$mutation = new cassandra_mutation(array(
+	     				'column_or_supercolumn'=> new cassandra_ColumnOrSuperColumn(array(
+				   				'column'=>  new cassandra_Column(array(
+												'name' 		=> $b['column'], 
+												'value'		=> $b['value'], 
+												'timestamp' => $this->time()
+											)),
+											
+		   						'super_column'=>$b['supercolumn']
+		   				))
+		   			));
+				}
+				else
+				{
+					$mutation = new cassandra_mutation(array(
+						'deletion'=>new cassandra_Deletion(array(
+							'timestamp' => $this->time(),
+							'super_column'	=> $b['supercolumn']
+						))
+					));
+				}
+	      			
+				$mutationMap[$b['key']][$b['cf']][] = $mutation;
+				$mutation=null;
+			}
+
+			$this->__batchContainer = array();
+			$size = $this->__batchSize;
+			$this->__batchSize = 0;
+			
+			try{
+				$this->__client->batch_mutate($mutationMap, $consistencyLevel);
+				return $size;
+			}catch(Exception $e){return false;}
+		}
+		
+		public function batch($value=null)
+		{
+			$this->__collectBatch($value);
+			$this->__resetPath();
+			return $this;
+		}
+		
 		public function set($value,$consistencyLevel=cassandra_ConsistencyLevel::ALL)
 		{
 			if(!$this->__connected) return false;
@@ -753,7 +836,6 @@
 			return pack("H*", $uuid);
 		}
 	}
-
 
 	/*
 	 * DEPENDENCIES
