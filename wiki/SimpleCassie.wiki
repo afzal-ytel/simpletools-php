@@ -50,6 +50,19 @@ Please report all bugs under: http://code.google.com/p/simpletools-php/issues/li
    $cassie->cf('Users')->key('user1')->column('surname')->set('Rosinski');
    
   /*
+  * setting in batches
+  * @return - number of batches or false on failure
+  */
+   $cassie->cf('Users')->key('user1')->column('name')->batch('Marcin');
+   $cassie->cf('Users')->key('user1')->column('surname')->batch('Rosinski');
+
+   //batching deletion
+   $cassie->cf('Users')->key('user1')->column('columntodrop')->batch();
+
+   //commiting all above batches
+   $cassie->batchCommit();
+
+  /*
   * delete column or row/key
   * @return - (false) on failure
   */
