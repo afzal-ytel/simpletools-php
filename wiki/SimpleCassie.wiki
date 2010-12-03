@@ -210,9 +210,7 @@ extension=thrift_protocol.so
   * ->remove() method for multiple rows/keys
   * ->increment() method for multiple rows/keys
   * ->decrement() method for multiple rows/keys
-  * ->truncate()
   * all describe methods
-  * ->batch_mutate()
 
 == Download Link ==
 SimpleCassie.php download - http://simpletools-php.googlecode.com/files/SimpleCassie.zip
