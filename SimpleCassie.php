@@ -38,13 +38,6 @@
  * 
  */
  
-	require_once(dirname(__FILE__).'/0.7.x/src/Thrift.php');
-	require_once(dirname(__FILE__).'/0.7.x/src/transport/TSocket.php');
-	require_once(dirname(__FILE__).'/0.7.x/src/transport/TBufferedTransport.php');
-	require_once(dirname(__FILE__).'/0.7.x/src/transport/TFramedTransport.php');
-	require_once(dirname(__FILE__).'/0.7.x/src/protocol/TBinaryProtocol.php');
-	require_once(dirname(__FILE__).'/0.7.x/Cassandra.php');
-	
 	
 	class SimpleCassie
 	{
