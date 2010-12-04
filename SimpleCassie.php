@@ -34,11 +34,10 @@
  * @copyright  		Copyrights (c) 2010 Marcin Rosinski - 33Concept Ltd. (http://www.33concept.com)
  * @contributes		Workdigital Ltd. (www.workdigital.co.uk)
  * @license    		http://www.opensource.org/licenses/bsd-license.php - BSD
- * @version    		Ver: 0.7.1.5 2010-12-03 20:52
+ * @version    		Ver: 0.7.1.5 2010-12-04 18:03
  * 
  */
- 
-	
+ 	
 	class SimpleCassie
 	{
 		private $__connection 	= null;
@@ -615,7 +614,7 @@
 		{
 			$this->__collectBatch($value);
 			$this->__resetPath();
-			return $this;
+			return $this->__batchSize;
 		}
 		
 		public function set($value,$consistencyLevel=cassandra_ConsistencyLevel::ALL)
@@ -829,6 +828,7 @@
 			return pack("H*", $uuid);
 		}
 	}
+
 
 	/*
 	 * DEPENDENCIES
