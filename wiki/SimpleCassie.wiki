@@ -220,7 +220,7 @@ extension=thrift_protocol.so
 
 == Development Roadmap ==
   * Connection Load Balancing
-  * ->remove() method for multiple rows/keys
+  * ->remove() method for multiple rows/keys - possible in batch() method, look above
   * ->increment() method for multiple rows/keys
   * ->decrement() method for multiple rows/keys
   * all describe methods
