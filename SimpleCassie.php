@@ -34,10 +34,10 @@
  * @copyright  		Copyrights (c) 2010 Marcin Rosinski - 33Concept Ltd. (http://www.33concept.com)
  * @contributes		Workdigital Ltd. (www.workdigital.co.uk)
  * @license    		http://www.opensource.org/licenses/bsd-license.php - BSD
- * @version    		Ver: 0.7.1.5 2010-12-04 18:03
+ * @version    		Ver: 0.7.1.6 2010-12-06 17:50
  * 
  */
- 	
+ 
 	class SimpleCassie
 	{
 		private $__connection 	= null;
@@ -576,13 +576,20 @@
 				{
 					$mutation = new cassandra_mutation(array(
 	     				'column_or_supercolumn'=> new cassandra_ColumnOrSuperColumn(array(
-				   				'column'=>  new cassandra_Column(array(
+				   				'column'=> ($b['supercolumn'] == '') ? new cassandra_Column(array(
 												'name' 		=> $b['column'], 
 												'value'		=> $b['value'], 
 												'timestamp' => $this->time()
-											)),
+											)) : null,
 											
-		   						'super_column'=>$b['supercolumn']
+		   						'super_column'=> ($b['supercolumn'] != '') ? new cassandra_SuperColumn(array(
+												'name' => $b['supercolumn'],
+												'columns' => array(new cassandra_Column(array(
+																'name' 		=> $b['column'], 
+																'value'		=> $b['value'], 
+																'timestamp' => $this->time()
+															))
+												))) : null
 		   				))
 		   			));
 				}
@@ -591,7 +598,8 @@
 					$mutation = new cassandra_mutation(array(
 						'deletion'=>new cassandra_Deletion(array(
 							'timestamp' => $this->time(),
-							'super_column'	=> $b['supercolumn']
+							'super_column'	=> $b['supercolumn'],
+							'predicate' => ($b['column'] != '') ? new cassandra_SlicePredicate(array('column_names'=>array($b['column']))) : null
 						))
 					));
 				}
