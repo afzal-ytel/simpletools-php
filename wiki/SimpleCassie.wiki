@@ -233,4 +233,4 @@ SimpleCassie.php download - http://simpletools-php.googlecode.com/files/SimpleCa
 
 == Contributes ==
 <a href="http://www.33concept.com/">33Concept Ltd</a><br>
-<a href="http://www.workdigital.co.uk/">WorkDigital Ltd</a>
+[http://www.workdigital.co.uk/ WorkDigital Ltd]
