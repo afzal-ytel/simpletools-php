@@ -230,3 +230,7 @@ SimpleCassie.php download - http://simpletools-php.googlecode.com/files/SimpleCa
 
 == Discussion Group ==
 [http://groups.google.com/group/simpletools/browse_thread/thread/b2d5afc83e7acd5b SimpleCassie related discussion]
+
+== Contributes ==
+[http://www.33concept.com/ 33Concept Ltd]
+[http://www.workdigital.co.uk/ WorkDigital Ltd]
