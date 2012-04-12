@@ -549,7 +549,7 @@
 			}
 		}
 		
-		private function __collectBatch($val=null)
+		private function __collectBatch($val=null, $ttl=null)
 		{
 			$batch = array(
 				'cf'			=> $this->__columnFamily,
@@ -558,9 +558,10 @@
 				'column'		=> $this->__column,
 			);
 			
-			if($val!==null)
+			if($val!==null) {
 				$batch['value']	= $val;
-			
+                                $batch['ttl'] = $ttl;  
+		        } 	
 			$this->__batchContainer[] = $batch;
 			$this->__batchSize++;
 		}
@@ -579,7 +580,8 @@
 				   				'column'=> ($b['supercolumn'] == '') ? new cassandra_Column(array(
 												'name' 		=> $b['column'], 
 												'value'		=> $b['value'], 
-												'timestamp' => $this->time()
+												'timestamp' => $this->time(),
+                                                                                                'ttl' => $b['ttl']
 											)) : null,
 											
 		   						'super_column'=> ($b['supercolumn'] != '') ? new cassandra_SuperColumn(array(
@@ -587,7 +589,8 @@
 												'columns' => array(new cassandra_Column(array(
 																'name' 		=> $b['column'], 
 																'value'		=> $b['value'], 
-																'timestamp' => $this->time()
+																'timestamp' => $this->time(),
+                                                                                                                                'ttl' => $b['ttl']
 															))
 												))) : null
 		   				))
@@ -618,14 +621,14 @@
 			}catch(Exception $e){return false;}
 		}
 		
-		public function batch($value=null)
+		public function batch($value=null, $ttl=null)
 		{
-			$this->__collectBatch($value);
+			$this->__collectBatch($value, $ttl);
 			$this->__resetPath();
 			return $this->__batchSize;
 		}
 		
-		public function set($value,$consistencyLevel=cassandra_ConsistencyLevel::ALL)
+		public function set($value, $consistencyLevel=cassandra_ConsistencyLevel::ALL, $ttl=null )
 		{
 			if(!$this->__connected) return false;
 			
@@ -635,7 +638,7 @@
 				$col->name			=$this->__column;
 			    $col->timestamp		=$this->time();
 			    $col->value			=$value; 
-			    
+                            $col->ttl = $ttl;
 				$this->__client->insert($this->__key,$this->__getColumn(),$col,$consistencyLevel);
 				$this->__resetPath();
 				return true;
